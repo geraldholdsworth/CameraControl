@@ -2,8 +2,8 @@
 -------------------------------
 * Initial Version
 
-1.01
-----
+1.01 - Monday 1st November 2021
+-------------------------------
 * Application is now a tray icon task.
 * Added menu to tray icon for opening the controls, about box, settings, and quit.
 * Improved the hit detection on the navigation buttons.
