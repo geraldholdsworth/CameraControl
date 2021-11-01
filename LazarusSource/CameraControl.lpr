@@ -7,7 +7,7 @@ uses
  cthreads,
  {$ENDIF}{$ENDIF}
  Interfaces, // this includes the LCL widgetset
- Forms, MainUnit
+ Forms, MainUnit, AboutUnit, SettingsUnit
  { you can add units after this };
 
 {$R *.res}
@@ -17,8 +17,10 @@ begin
  Application.Title:='Camera Control';
  Application.Scaled:=True;
  Application.Initialize;
- //Application.ShowMainForm:=False;
+ Application.ShowMainForm:=False;
  Application.CreateForm(TMainForm, MainForm);
+ Application.CreateForm(TAboutForm, AboutForm);
+ Application.CreateForm(TSettingsForm, SettingsForm);
  Application.Run;
 end.
 

@@ -1,0 +1,12 @@
+1.00 - Monday 25th October 2021
+-------------------------------
+* Initial Version
+
+1.01
+----
+* Application is now a tray icon task.
+* Added menu to tray icon for opening the controls, about box, settings, and quit.
+* Improved the hit detection on the navigation buttons.
+* Added presets.
+* Fixed a bug where it would check for the wrong return byte on cameras 2 to 7.
+* Added a camera settings page to adjust finer details of the camera.

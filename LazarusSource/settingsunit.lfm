@@ -1,0 +1,992 @@
+object SettingsForm: TSettingsForm
+  Left = 427
+  Height = 473
+  Top = 193
+  Width = 639
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Camera Settings'
+  ClientHeight = 473
+  ClientWidth = 639
+  Position = poScreenCenter
+  LCLVersion = '2.0.12.0'
+  object lbCamDetails: TLabel
+    Left = 0
+    Height = 38
+    Top = 0
+    Width = 639
+    Align = alTop
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'lbCamDetails'
+    Font.Height = 32
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    OptimalFill = True
+  end
+  object CamPowerPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 38
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 0
+    object CamPowerLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Camera Power: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object CamPowerOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object CamPowerOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object AFPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 56
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 1
+    object AFLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Auto Focus Sensitivity: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object AFSensNorm: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 63
+      Caption = 'Normal'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object AFSensLow: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 45
+      Caption = 'Low'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object WBPanel: TPanel
+    Left = 0
+    Height = 36
+    Top = 74
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 36
+    ClientWidth = 639
+    TabOrder = 2
+    object WBLabel: TLabel
+      Left = 0
+      Height = 36
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'White Balance Mode: '
+      Font.Style = [fsBold]
+      Layout = tlCenter
+      ParentColor = False
+      ParentFont = False
+    end
+    object WBModeAuto: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 49
+      Caption = 'Auto'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object WBModeIndoor: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 59
+      Caption = 'Indoor'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+    object WBModeOutdoor: TRadioButton
+      Left = 360
+      Height = 18
+      Top = 0
+      Width = 69
+      Caption = 'Outdoor'
+      OnChange = RadioOnChange
+      TabOrder = 2
+    end
+    object WBOnePush: TRadioButton
+      Left = 472
+      Height = 18
+      Top = 0
+      Width = 100
+      Caption = 'One Push WB'
+      OnChange = RadioOnChange
+      TabOrder = 3
+    end
+    object WBManual: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 18
+      Width = 63
+      Caption = 'Manual'
+      OnChange = RadioOnChange
+      TabOrder = 4
+    end
+    object WBManualTable: TRadioButton
+      Left = 360
+      Height = 18
+      Top = 18
+      Width = 106
+      Caption = 'Manual (Table)'
+      OnChange = RadioOnChange
+      TabOrder = 5
+    end
+    object WBModeATW: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 18
+      Width = 49
+      Caption = 'ATW'
+      OnChange = RadioOnChange
+      TabOrder = 6
+    end
+  end
+  object AEPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 110
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 3
+    object AELabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Auto Exposure Mode: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object AEFullAuto: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 72
+      Caption = 'Full Auto'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object AEManual: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 63
+      Caption = 'Manual'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+    object AEShutPrior: TRadioButton
+      Left = 360
+      Height = 18
+      Top = 0
+      Width = 108
+      Caption = 'Shutter Priority'
+      OnChange = RadioOnChange
+      TabOrder = 2
+    end
+    object AEIrisPrior: TRadioButton
+      Left = 472
+      Height = 18
+      Top = 0
+      Width = 84
+      Caption = 'Iris Priority'
+      OnChange = RadioOnChange
+      TabOrder = 3
+    end
+    object AEBright: TRadioButton
+      Left = 568
+      Height = 18
+      Top = 0
+      Width = 57
+      Caption = 'Bright'
+      OnChange = RadioOnChange
+      TabOrder = 4
+    end
+  end
+  object SlowShutterPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 128
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 4
+    object SlowShutterLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Slow Shutter Mode: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object SlowShutterAuto: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 49
+      Caption = 'Auto'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object SlowShutterManual: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 63
+      Caption = 'Manual'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object ExposurePanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 146
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 5
+    object ExposureLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Exposure Compensation Mode: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object ExposureOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object ExposureOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object BackLightPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 164
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 6
+    object BackLightLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Back Light Mode: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object BackLightOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object BackLightOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object RedGainPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 272
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 7
+    object RedGainLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Red Gain: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object RedGain: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 255
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object BlueGainPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 290
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 8
+    object BlueGainLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Blue Gain: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object BlueGain: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 255
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object ShutterPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 308
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 9
+    object ShutterLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Shutter Position: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object ShutterPosition: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 21
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object IrisPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 326
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 10
+    object IrisLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Iris Position: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object IrisPosition: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 17
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object GainPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 344
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 11
+    object GainLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Gain Position: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object GainPosition: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 15
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object BrightPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 362
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 12
+    object BrightLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Brightness Position: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object BrightPosition: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 31
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object ExpGainPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 380
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 13
+    object ExpGainLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Exposure Compensation Position: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object ExposurePosition: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 14
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object AperturePanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 398
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 14
+    object ApertureLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Aperture Gain: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object ApertureGain: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object PanSpeedPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 416
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 15
+    object PanSpeedLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Pan Speed: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object PanSpeedSlider: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 24
+      Min = 1
+      OnChange = PanSpeedSliderChange
+      Position = 1
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object TiltSpeedPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 434
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 16
+    object TiltSpeedLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Tilt Speed: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object TiltSpeedSlider: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 23
+      Min = 1
+      OnChange = TiltSpeedSliderChange
+      Position = 1
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object ZoomSpeedPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 452
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 17
+    object ZoomSpeedLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Zoom Speed: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object ZoomSpeedSlider: TTrackBar
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 410
+      Max = 24
+      OnChange = ZoomSpeedSliderChange
+      Position = 0
+      TickStyle = tsNone
+      TabOrder = 0
+    end
+  end
+  object MirrorPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 182
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 18
+    object MirrorLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Mirror: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object MirrorOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object MirrorOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object FlipPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 200
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 19
+    object FlipLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Flip: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object FlipOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object FlipOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object GammaPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 218
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 20
+    object GammaLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Gamma: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object GammaOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object GammaOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+  object CallLEDPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 236
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 21
+    object CallLEDLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Call LED: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object CallLEDOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object CallLEDOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+    object CallLEDBlink: TRadioButton
+      Left = 360
+      Height = 18
+      Top = 0
+      Width = 50
+      Caption = 'Blink'
+      OnChange = RadioOnChange
+      TabOrder = 2
+    end
+  end
+  object PowerLEDPanel: TPanel
+    Left = 0
+    Height = 18
+    Top = 254
+    Width = 639
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 18
+    ClientWidth = 639
+    TabOrder = 22
+    object PowerLEDLabel: TLabel
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 224
+      Align = alLeft
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Power LED: '
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object PowerLEDOn: TRadioButton
+      Left = 224
+      Height = 18
+      Top = 0
+      Width = 39
+      Caption = 'On'
+      OnChange = RadioOnChange
+      TabOrder = 0
+    end
+    object PowerLEDOff: TRadioButton
+      Left = 296
+      Height = 18
+      Top = 0
+      Width = 40
+      Caption = 'Off'
+      OnChange = RadioOnChange
+      TabOrder = 1
+    end
+  end
+end
