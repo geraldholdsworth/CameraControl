@@ -11,7 +11,7 @@
 * Fixed a bug where it would check for the wrong return byte on cameras 2 to 7.
 * Added a camera settings page to adjust finer details of the camera.
 
-1.02
-----
+1.02 - Wednesday 5th October 2022
+---------------------------------
 * The connected camera would be forgotten about when the main window is closed and re-opened again. This has now been fixed.
 * Utilised a different module for serial communications. Application now works on macOS.
