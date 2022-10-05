@@ -11,6 +11,7 @@ object MainForm: TMainForm
   Color = 4473924
   DragMode = dmAutomatic
   OnClose = FormClose
+  OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnKeyUp = FormKeyUp
   OnMouseDown = FormMouseDown
@@ -19,7 +20,7 @@ object MainForm: TMainForm
   OnShow = FormShow
   Position = poScreenCenter
   ShowInTaskBar = stNever
-  LCLVersion = '2.0.12.0'
+  LCLVersion = '2.2.0.4'
   object LeftButton: TImage
     Left = 8
     Height = 211
@@ -11377,8 +11378,8 @@ object MainForm: TMainForm
     Font.Height = 33
     Font.Name = 'Courier New'
     Font.Style = [fsBold]
-    ParentColor = False
     ParentFont = False
+    ParentShowHint = False
     WordWrap = True
     OptimalFill = True
   end
@@ -23120,11 +23121,6 @@ object MainForm: TMainForm
     object MenuShowHide: TMenuItem
       Caption = 'Show Camera Controls...'
       OnClick = MenuShowHideClick
-    end
-    object MenuSettings: TMenuItem
-      Caption = 'Camera Settings...'
-      Enabled = False
-      OnClick = MenuSettingsClick
     end
     object MenuAbout: TMenuItem
       Caption = 'About...'

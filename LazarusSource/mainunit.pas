@@ -1,7 +1,9 @@
 unit MainUnit;
 
 {
-Copyright (C) 2021 Gerald Holdsworth gerald@hollypops.co.uk
+Copyright (C) 2021-22 Gerald Holdsworth gerald@hollypops.co.uk
+
+Ararat Synapse is (c)2001-2011, Lukas Gebauer
 
 This source is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public Licence as published by the Free
@@ -25,15 +27,16 @@ interface
 
 uses
  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
- Menus, ComCtrls, LCLType, Global,
- {$IFNDEF Darwin}Serial{$ENDIF}{$IFDEF Darwin}SerialMac{$ENDIF};
+ Menus, ComCtrls, LCLType, GJHRegistryClass,CC_SynaSer;
 
 type
 
  TCameras = record
    OnGraphic,
    OffGraphic,
-   Control    : TImage;
+   Control      : TImage;
+   SerialNumber : String;
+   CamMoving    : Boolean;
  end;
 
  { TMainForm }
@@ -76,7 +79,6 @@ type
   Preset8: TImage;
   Preset9: TImage;
   MenuAbout: TMenuItem;
-  MenuSettings: TMenuItem;
   MenuShowHide: TMenuItem;
   MenuExit: TMenuItem;
   PopupMenu1: TPopupMenu;
@@ -110,7 +112,6 @@ type
   procedure CamMouseUp(Sender: TObject; Button: TMouseButton;
    Shift: TShiftState; X, Y: Integer);
   procedure CloseWindowClick(Sender: TObject);
-  procedure FindCamera;
   procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
   procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -123,6 +124,9 @@ type
    Shift: TShiftState; X, Y: Integer);
   procedure ButtonMouseDown(Sender: TObject; Button: TMouseButton;
    Shift: TShiftState; X, Y: Integer);
+  procedure FormShow(Sender: TObject);
+  function GetSerialNumber: String;
+  procedure SelectCamera(index: Integer);
   procedure MenuExitClick(Sender: TObject);
   procedure MenuSettingsClick(Sender: TObject);
   procedure ShowCamSettings(ctrl: TObject=nil);
@@ -138,35 +142,36 @@ type
   procedure StopCamera;
   procedure ZoomCamera(tele,wide: Boolean);
   procedure StopZoom;
-  procedure FormShow(Sender: TObject);
+  procedure FormCreate(Sender: TObject);
   procedure ZoomOutButtonMouseDown(Sender: TObject; Button: TMouseButton;
    Shift: TShiftState; X, Y: Integer);
   procedure ZoomButtonMouseUp(Sender: TObject; Button: TMouseButton;
    Shift: TShiftState; X, Y: Integer);
   procedure ZoomInButtonMouseDown(Sender: TObject;
    Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-  procedure ChangeCamera(cam: Integer);
   procedure AllCamsOff;
   function OverActiveArea(Sender:TObject;X,Y:Integer): Boolean;
   function ControlUnderMouse(var X,Y: Integer):TControl;
-  function SendSerialCommand(buffer: String;port: TSerialHandle=0): String;
+  function SendSerialCommand(buffer: String): String;
   function ValidReturnMessage(buffer: String): Boolean;
+  procedure SerClose;
+  function ValidateCamNumber(cam: Integer=0;sernum: Boolean=True): Boolean;
  private
-  commport    : TSerialHandle;
+  Connection  : TBlockSerial;
+  ConnectName : String;
   camnumber   : Byte;
   serspeed    : LongInt;
-  Parity      : TParityType;
+  Parity      : Char;
   bits,
   StopBits    : Integer;
-  sernum      : String;
   mousePos    : TPoint;
-  cammoving,
   mouseIsDown,
   keypressed  : Boolean;
   pressedctrl : TImage;
   Cameras     : array[1..7] of TCameras;
+  CCReg       : TGJHRegistry;
   const
-   AppVersion = '1.01';
+   AppVersion = '1.02';
  public
   tiltspeed,
   panspeed,
@@ -184,10 +189,12 @@ uses AboutUnit, SettingsUnit;
 
 { TMainForm }
 
-procedure TMainForm.FormShow(Sender: TObject);
+procedure TMainForm.FormCreate(Sender: TObject);
+var
+ i: Integer;
 begin
+ Connection:=nil;
  //Setup camera
- commport :=0;
  tiltspeed:=1;
  panspeed :=1;
  zoomspeed:=15;
@@ -195,13 +202,12 @@ begin
  //Set up serial settings
  serspeed :=9600;
  bits     :=8;
- Parity   :=NoneParity;
- StopBits :=1;
+ Parity   :='N';//NoneParity;
+ StopBits :=SB1;
  //Other
  keypressed :=False;
  mouseIsDown:=False;
  pressedctrl:=nil;
- cammoving  :=False;
  //Camera Buttons
  Cameras[1].Control   :=Cam1;
  Cameras[1].OnGraphic :=Cam1on;
@@ -224,88 +230,17 @@ begin
  Cameras[7].Control   :=Cam7;
  Cameras[7].OnGraphic :=Cam7on;
  Cameras[7].OffGraphic:=Cam7off;
-end;
-
-procedure TMainForm.FindCamera;
-var
- i,j,camport : Integer;
- thiscommport: TSerialHandle;
- Flags       : TSerialFlags;
- s           : String;
- buffer      : String;
-const
-{$IFDEF Windows}
- commname='COM';
-{$ENDIF}
-{$IFDEF Darwin}
- commname='/dev/ttyS';
-{$ENDIF}
-{$IFDEF Linux}
- commname='/dev/ttyS';
-{$ENDIF}
-begin
- camport:=-1;
- i:=0;
- Application.ProcessMessages;
- while(i<10)and(camport=-1)do
+ for i:=1 to 7 do
  begin
-  s:=commname+IntToStr(i);
-  thiscommport:=SerOpen(s);
-  CamStatus.Caption:='Detecting camera '+IntToStr(camnumber)+' on '+s;
-  Application.ProcessMessages;
-  if thiscommport<>0 then
-  begin
-   Flags:=[];
-   SerSetParams(thiscommport,serspeed,bits,Parity,StopBits,Flags);
-   buffer:=SendSerialCommand(#$09#$04#$24,thiscommport);
-   if ValidReturnMessage(buffer) then
-   begin
-    sernum:='';
-    for j:=0 to 11 do
-     if Ord(buffer[j+3])>31 then
-      sernum:=sernum+chr(Ord(buffer[j+3])AND$7F);
-    camport:=i;
-   end
-   else
-   begin
-    buffer:=SendSerialCommand(#$09#$04#$22,thiscommport);
-    if ValidReturnMessage(buffer) then
-    begin
-     sernum:=IntToHex((Ord(buffer[3])AND$F)<<12
-                    OR(Ord(buffer[4])AND$F)<<8
-                    OR(Ord(buffer[5])AND$F)<<4
-                    OR(Ord(buffer[6])AND$F),4);
-     camport:=i;
-    end;
-   end;
-   SerClose(thiscommport);
-  end;
-  inc(i);
+  Cameras[i].CamMoving:=False;
+  Cameras[i].SerialNumber:='';
  end;
- MenuSettings.Enabled:=False;
- if camport>=0 then
- begin
-  commport:=SerOpen(commname+IntToStr(camport));
-  Flags:=[];
-  SerSetParams(commport,serspeed,bits,Parity,StopBits,Flags);
-  CamStatus.Caption:='Connected to camera on '+s+' s/n: '+sernum;
-  MenuSettings.Enabled:=True;
- end
- else CamStatus.Caption:='No camera found';
+ CCReg:=TGJHRegistry.Create('\Software\GJH Software\Camera Control');
 end;
 
 procedure TMainForm.CloseWindowClick(Sender: TObject);
 begin
  MainForm.Hide;
-end;
-
-procedure TMainForm.ChangeCamera(cam: Integer);
-begin
- if commport>0 then SerClose(commport);
- commport:=0;
- camnumber:=cam;
- FindCamera;
- if commport=0 then AllCamsOff;
 end;
 
 procedure TMainForm.AllCamsOff;
@@ -314,7 +249,6 @@ var
 begin
  for index:=1 to 7 do
   Cameras[index].Control.Picture.Assign(Cameras[index].OffGraphic.Picture);
- MenuSettings.Enabled:=False;
 end;
 
 procedure TMainForm.CamMouseDown(Sender: TObject; Button: TMouseButton;
@@ -338,12 +272,15 @@ end;
 procedure TMainForm.CamMouseUp(Sender: TObject; Button: TMouseButton;
  Shift: TShiftState; X, Y: Integer);
 begin
- ChangeCamera(StrToInt(RightStr(TControl(Sender).Name,1)));
+ SelectCamera(StrToInt(RightStr(TControl(Sender).Name,1)));
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+ i: Integer;
 begin
- if commport>0 then SerClose(commport);
+ for i:=1 to 7 do Cameras[i].SerialNumber:='';
+ SerClose;
 end;
 
 procedure TMainForm.FormKeyDown(Sender: TObject;var Key:Word;Shift:TShiftState);
@@ -402,6 +339,7 @@ var
  lr,ud,
  ts,ps : Byte;
 begin
+ if not ValidateCamNumber then exit;
  lr:=0;
  ud:=0;
  if moveleft  then lr:=lr OR 1;
@@ -416,11 +354,11 @@ begin
  begin
   ts:=3;
   ps:=3;
-  cammoving:=False;
+  Cameras[camnumber].CamMoving:=False;
  end;
- if(commport>0)and(not cammoving)then
+ if(Cameras[camnumber].SerialNumber<>'')and(not Cameras[camnumber].CamMoving)then
   SendSerialCommand(#$01#$06#$01+chr(ps)+chr(ts)+chr(lr)+chr(ud));
- cammoving:=(ts<>3)or(ps<>3);
+ Cameras[camnumber].CamMoving:=(ts<>3)or(ps<>3);
 end;
 
 procedure TMainForm.StopCamera;
@@ -433,6 +371,7 @@ var
  zs,
  dir   : Byte;
 begin
+ if not ValidateCamNumber then exit;
  dir:=0;
  if tele then dir:=2;
  if wide then dir:=3;         
@@ -441,11 +380,11 @@ begin
  if dir=0 then //Stop zoom
  begin
   zs:=0;
-  cammoving:=False;
+  Cameras[camnumber].CamMoving:=False;
  end;
- if(commport>0)and(not cammoving)then
+ if(Cameras[camnumber].SerialNumber<>'')and(not Cameras[camnumber].CamMoving)then
   SendSerialCommand(#$01#$04#$07+chr((dir<<4)OR zs));
- cammoving:=dir<>0;
+ Cameras[camnumber].CamMoving:=dir<>0;
 end;
 
 function TMainForm.OverActiveArea(Sender:TObject;X,Y:Integer): Boolean;
@@ -489,10 +428,10 @@ var
  buffer     : String;
  index      : Integer;
 begin
- if commport>0 then
-  if DoesKeyExist('Preset'+RightStr(TImage(Sender).Name,1))then
+ if ValidateCamNumber then
+  if CCReg.DoesKeyExist('Preset'+RightStr(TImage(Sender).Name,1))then
   begin
-   GetRegValA('Preset'+RightStr(TImage(Sender).Name,1),camsettings);
+   CCReg.GetRegValA('Preset'+RightStr(TImage(Sender).Name,1),camsettings);
    //Pan/Tilt Pos
    buffer:=#$01#$06#$02+chr(panspeed)+chr(tiltspeed);
    for index:=0 to 7 do buffer:=buffer+chr(camsettings[index+0]AND$F);
@@ -520,7 +459,7 @@ var
  buffer     : String;
  index      : Integer;
 begin
- if commport>0 then
+ if ValidateCamNumber then
  begin
   for index:=0 to 15 do camsettings[index]:=0;
   //Zoom Pos
@@ -540,7 +479,7 @@ begin
   if ValidReturnMessage(buffer) then
    for index:=0 to 7 do camsettings[index]:=Ord(buffer[index+3]);
   //Save to registry
-  SetRegValA('Preset'+RightStr(TImage(Sender).Name,1),camsettings);
+  CCReg.SetRegValA('Preset'+RightStr(TImage(Sender).Name,1),camsettings);
  end else ShowMessage('No camera selected');
 end;
 
@@ -558,7 +497,7 @@ procedure TMainForm.ButtonMouseDown(Sender: TObject; Button: TMouseButton;
 var
  ctrl: TControl;
 begin
- if commport=0 then
+ if not ValidateCamNumber then
   ShowMessage('No camera selected')
  else
   if OverActiveArea(Sender,X,Y) then
@@ -602,6 +541,108 @@ begin
   end;
 end;
 
+procedure TMainForm.FormShow(Sender: TObject);
+var
+ commname : String;
+ commnames: TStringArray;
+ i,c      : Integer;
+begin
+ //We'll check to see if we have a serial connection, if not we'll find one
+ if Connection=nil then //If this is nil, then there is no connection
+ begin 
+  //Get device names
+  commname:=GetSerialPortNames;
+  if commname<>'' then//No ports then quit
+  begin
+   commnames:=commname.Split(','); //Split into an array
+   //Go through each serial port to find camera 1
+   i:=0;
+   camnumber:=1;
+   while i<Length(commnames) do
+   begin
+    if commnames[i]<>'' then
+    begin
+     CamStatus.Caption:='Looking for cameras on '+commnames[i];
+     Application.ProcessMessages;
+     //Open each port in turn
+     Connection:=TBlockSerial.Create;
+     Connection.LinuxLock:=False;
+     {$IFDEF UNIX}
+     Connection.NonBlock:=True;
+     {$ENDIF}
+     Connection.Connect(commnames[i]);
+     Connection.Config(serspeed,bits,Parity,stopbits,false,false);
+     //See if there is a serial number being returned
+     Cameras[camnumber].SerialNumber:=GetSerialNumber;
+     if Cameras[camnumber].SerialNumber<>'' then //Yes, look for other cameras
+     begin
+      ConnectName:=commnames[i];
+      for c:=2 to Length(Cameras)-1 do
+      begin
+       camnumber:=c;
+       CamStatus.Caption:='Looking for camera '+IntToStr(camnumber)+' on '+ConnectName;
+       Application.ProcessMessages;
+       Cameras[camnumber].SerialNumber:=GetSerialNumber;
+      end;
+      i:=Length(commnames);//Exit the loop
+     end
+     else
+     begin
+      Connection.Free; //Nothing here, try the next one
+      Connection:=nil; //If it was the last one, this needs to be nil
+     end;
+    end;
+    inc(i);
+   end;
+  end;
+ end;
+ //Show or hide buttons depending on whether we have any cameras
+ for c:=Low(Cameras) to High(Cameras) do
+  Cameras[c].Control.Visible:=Cameras[c].SerialNumber<>'';
+ //Now if we have a connection
+ if Connection<>nil then SelectCamera(1)//Select camera 1, by default
+ else CamStatus.Caption:='No camera selected';
+end;
+
+function TMainForm.GetSerialNumber: String;
+var
+ buffer : String;
+ j      : Integer;
+begin
+ Result:='';
+ //Now we send a basic command, asking for the serial number
+ buffer:=SendSerialCommand(#$09#$04#$24);
+ //If we got a valid message back, extract the serial number
+ if ValidReturnMessage(buffer) then
+  for j:=0 to 11 do
+  begin
+   if Ord(buffer[j+3])>31 then
+    Result:=Result+chr(Ord(buffer[j+3])AND$7F);
+  end
+ else
+ begin
+  //Didn't get a valid message back, so we'll try another command
+  buffer:=SendSerialCommand(#$09#$04#$22);
+  //And check again
+  if ValidReturnMessage(buffer) then
+   Result:=IntToHex((Ord(buffer[3])AND$F)<<12
+                  OR(Ord(buffer[4])AND$F)<<8
+                  OR(Ord(buffer[5])AND$F)<<4
+                  OR(Ord(buffer[6])AND$F),4);
+ end;
+end;
+
+procedure TMainForm.SelectCamera(index: Integer);
+begin
+ if ValidateCamNumber(index) then
+ begin
+  Cameras[index].Control.Picture.Assign(Cameras[index].onGraphic.Picture);
+  CamStatus.Caption:='Serial Number: '+Cameras[index].SerialNumber
+                    +' Connected to: '+ConnectName;
+  camnumber:=index;
+ end;
+end;
+
 procedure TMainForm.MenuExitClick(Sender: TObject);
 begin
  MainForm.Close;
@@ -609,7 +650,7 @@ end;
 
 procedure TMainForm.MenuSettingsClick(Sender: TObject);
 begin
- if commport>0 then
+ if ValidateCamNumber then
  begin
   ShowCamSettings;
   //Show the form
@@ -623,10 +664,12 @@ procedure TMainForm.ShowCamSettings(ctrl: TObject=nil);
 var
  buffer: String;
 begin
+ if not ValidateCamNumber then exit;
  //Disable updates
  SettingsForm.ignorechange:=True;
  //Cemera Serial Number
- SettingsForm.lbCamDetails.Caption:='Camera serial number: '+sernum;
+ SettingsForm.lbCamDetails.Caption:='Camera serial number: '
+                                   +Cameras[camnumber].SerialNumber;
  //Camera Power Status
  if(TRadioButton(ctrl)=SettingsForm.CamPowerOn)
  or(TRadioButton(ctrl)=SettingsForm.CamPowerOff)
@@ -1016,11 +1059,8 @@ end;
 procedure TMainForm.SelectButtonMouseUp(Sender: TObject; Button: TMouseButton;
  Shift: TShiftState; X, Y: Integer);
 begin
+ if not ValidateCamNumber then exit;
  TImage(Sender).Picture.Assign(TempStore.Picture);
- if commport>0 then SerClose(commport);
- commport:=0;
- AllCamsOff;
- CamStatus.Caption:='No camera selected';
 end;
 
 procedure TMainForm.ZoomButtonMouseUp(Sender: TObject; Button: TMouseButton;
@@ -1033,8 +1073,7 @@ end;
 procedure TMainForm.ZoomInButtonMouseDown(Sender: TObject;
  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
- if commport=0 then ShowMessage('No camera selected')
- else
+ if ValidateCamNumber then
  begin
   ChangeImage(Sender,ZoomInOn);
   ZoomCamera(True,False);
@@ -1044,8 +1083,7 @@ end;
 procedure TMainForm.ZoomOutButtonMouseDown(Sender: TObject;
  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
- if commport=0 then ShowMessage('No camera selected')
- else
+ if ValidateCamNumber then
  begin
   ChangeImage(Sender,ZoomOutOn);
   ZoomCamera(False,True);
@@ -1086,30 +1124,33 @@ begin
  end;
 end;
 
-function TMainForm.SendSerialCommand(buffer: String;port: TSerialHandle=0): String;
+function TMainForm.SendSerialCommand(buffer: String): String;
 var
  return: String;
  status: Integer;
+ //temp  : String;
 begin
- if port=0 then port:=commport;
- //Is there anything in the buffer?
- return:=#00;
- while SerRead(port,return[1],1)>0 do;
+ if not ValidateCamNumber(0,False) then exit;
+ if Connection=nil then exit;
+ //Is there anything in the buffer? if so, then flush it out
+ if Connection.WaitingData>0 then Connection.RecvPacket(0);
  //Reset the return string
  Result:='';
  //Add the camera number and terminator
  buffer:=chr($80 OR camnumber)+buffer+#$FF;
  //Send the command
- if SerWrite(port,buffer[1],Length(buffer))>0 then //If sent OK
+ Connection.SendString(AnsiString(buffer));
+ Sleep(100); //Don't go too fast
+ if Connection.LastError=0 then //If sent OK
  begin
-  return:=#00;
-  status:=1;
+  Result:='';
+  status:=0;
   //And while there is data to be read
-  while(status>0)and(return<>#$FF)do//Until nothing read, or end of message
+  while Connection.WaitingData>0 do
   begin
-   //This will return as soon as something is in the buffer, or timeout if nothing
-   status:=SerReadTimeOut(port,return[1],40);
-   if status>0 then Result:=Result+return; //Add it to the return string
+   return:=Connection.RecvPacket(0);
+   status:=Connection.LastError;
+   if status=0 then Result:=Result+return; //Add it to the return string
   end;
  end;
 end;
@@ -1121,6 +1162,22 @@ begin
         and(buffer[2]=#$50)
         and(buffer[Length(buffer)]=#$FF)
  else Result:=False;
+end;
+
+procedure TMainForm.SerClose;
+begin
+ if Connection<>nil then
+ begin
+  Connection.Free;
+  Connection:=nil;
+ end;
+end;
+
+function TMainForm.ValidateCamNumber(cam: Integer=0;sernum: Boolean=True): Boolean;
+begin
+ if cam=0 then cam:=camnumber;
+ Result:=(cam>=Low(Cameras))and(cam<=High(Cameras))and(Connection<>nil);
+ if(Result)and(sernum)then Result:=Cameras[cam].SerialNumber<>'';
 end;
 
 end.

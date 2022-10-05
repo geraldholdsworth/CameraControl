@@ -9,7 +9,7 @@ object SettingsForm: TSettingsForm
   ClientHeight = 473
   ClientWidth = 639
   Position = poScreenCenter
-  LCLVersion = '2.0.12.0'
+  LCLVersion = '2.2.0.4'
   object lbCamDetails: TLabel
     Left = 0
     Height = 38
@@ -21,7 +21,6 @@ object SettingsForm: TSettingsForm
     Caption = 'lbCamDetails'
     Font.Height = 32
     Font.Style = [fsBold]
-    ParentColor = False
     ParentFont = False
     OptimalFill = True
   end
@@ -45,7 +44,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Camera Power: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object CamPowerOn: TRadioButton
@@ -87,7 +85,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Auto Focus Sensitivity: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object AFSensNorm: TRadioButton
@@ -130,7 +127,6 @@ object SettingsForm: TSettingsForm
       Caption = 'White Balance Mode: '
       Font.Style = [fsBold]
       Layout = tlCenter
-      ParentColor = False
       ParentFont = False
     end
     object WBModeAuto: TRadioButton
@@ -217,7 +213,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Auto Exposure Mode: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object AEFullAuto: TRadioButton
@@ -286,7 +281,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Slow Shutter Mode: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object SlowShutterAuto: TRadioButton
@@ -328,7 +322,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Exposure Compensation Mode: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object ExposureOn: TRadioButton
@@ -370,7 +363,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Back Light Mode: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object BackLightOn: TRadioButton
@@ -412,7 +404,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Red Gain: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object RedGain: TTrackBar
@@ -446,7 +437,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Blue Gain: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object BlueGain: TTrackBar
@@ -480,7 +470,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Shutter Position: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object ShutterPosition: TTrackBar
@@ -514,7 +503,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Iris Position: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object IrisPosition: TTrackBar
@@ -548,7 +536,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Gain Position: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object GainPosition: TTrackBar
@@ -582,7 +569,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Brightness Position: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object BrightPosition: TTrackBar
@@ -616,7 +602,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Exposure Compensation Position: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object ExposurePosition: TTrackBar
@@ -650,7 +635,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Aperture Gain: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object ApertureGain: TTrackBar
@@ -683,7 +667,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Pan Speed: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object PanSpeedSlider: TTrackBar
@@ -719,7 +702,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Tilt Speed: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object TiltSpeedSlider: TTrackBar
@@ -755,7 +737,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Zoom Speed: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object ZoomSpeedSlider: TTrackBar
@@ -790,7 +771,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Mirror: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object MirrorOn: TRadioButton
@@ -832,7 +812,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Flip: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object FlipOn: TRadioButton
@@ -874,7 +853,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Gamma: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object GammaOn: TRadioButton
@@ -916,7 +894,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Call LED: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object CallLEDOn: TRadioButton
@@ -967,7 +944,6 @@ object SettingsForm: TSettingsForm
       AutoSize = False
       Caption = 'Power LED: '
       Font.Style = [fsBold]
-      ParentColor = False
       ParentFont = False
     end
     object PowerLEDOn: TRadioButton

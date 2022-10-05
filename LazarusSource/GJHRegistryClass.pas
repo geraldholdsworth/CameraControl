@@ -1,7 +1,8 @@
-unit Global;
+unit GJHRegistryClass;
 
 {
-Copyright (C) 2018-2021 Gerald Holdsworth gerald@hollypops.co.uk
+TGJHRegistry class V1.00
+Copyright (C) 2022 Gerald Holdsworth gerald@hollypops.co.uk
 
 This source is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public Licence as published by the Free
@@ -19,217 +20,197 @@ to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 Boston, MA 02110-1335, USA.
 }
 
-{$mode objfpc}{$H+}
+{$mode ObjFPC}{$H+}
 
 interface
 
 uses
- Classes,SysUtils,Registry;
+ Classes, Registry;
 
-function ReadLine(var Stream: TFileStream;var Line: string): boolean;
-function WriteLine(var Stream: TFileStream;Line: string): boolean;
-procedure OpenReg(key: String);
-function DeleteKey(key: String): Boolean;
-function GetRegValS(V: String;D: String): String;
-procedure GetRegValA(V: String;var D: array of Byte);
-function GetRegValI(V: String;D: Cardinal): Cardinal;
-function GetRegValB(V: String;D: Boolean): Boolean;
-procedure SetRegValS(V: String;D: String);
-procedure SetRegValA(V: String;var D: array of Byte);
-procedure SetRegValI(V: String;D: Cardinal);
-procedure SetRegValB(V: String;D: Boolean);
-function ExtractKey(var V: String):String;
-function DoesKeyExist(V: String):Boolean;
-var
- CCReg              : TRegistry;
-const
- //Registry Key to use
- RegKey = '\Software\GJH Software\Camera Control';
+{$M+}
+
+type
+  TGJHRegistry = class
+  private
+   FRegistry : TRegistry;
+   FRegKey   : String;
+   procedure OpenReg(key: String);
+   function ExtractKey(var V: String):String;
+  published
+   constructor Create(RegKey: String);
+   function DeleteKey(key: String): Boolean;
+   function GetRegValS(V: String;D: String): String;
+   procedure GetRegValA(V: String;var D: array of Byte);
+   function GetRegValI(V: String;D: Cardinal): Cardinal;
+   function GetRegValB(V: String;D: Boolean): Boolean;
+   procedure SetRegValS(V: String;D: String);
+   procedure SetRegValA(V: String;var D: array of Byte);
+   procedure SetRegValI(V: String;D: Cardinal);
+   procedure SetRegValB(V: String;D: Boolean);
+   function DoesKeyExist(V: String):Boolean;
+  public
+   destructor Destroy; override;
+  end;
 
 implementation
 
 {-------------------------------------------------------------------------------
-Reads a line from a TStream
+Class creator - initialises the global variables
 -------------------------------------------------------------------------------}
-function ReadLine(var Stream: TFileStream;var Line: string): boolean;
-var
- RawLine: UTF8String;
- ch     : AnsiChar;
+constructor TGJHRegistry.Create(RegKey: String);
 begin
- RawLine:='';
- Result:=False;
- ch:=#0;
- while (Stream.Read(ch,1)=1) and (ch<>#13) and (ch<>#10) do
- begin
-  Result:=True;
-  RawLine:=RawLine+UTF8String(ch);
- end;
- Line:=String(RawLine);
- if ch=#13 then
- begin
-  Result:=True;
-  if (Stream.Read(ch,1)=1) and (ch<>#10) then
-   Stream.Seek(-1,soCurrent) // unread it if not LF character.
- end;
- if ch=#10 then
- begin
-  Result:=True;
-  if (Stream.Read(ch,1)=1) and (ch<>#13) then
-   Stream.Seek(-1,soCurrent) // unread it if not CR character.
- end;
+ inherited Create;
+ FRegKey:=RegKey;
 end;
 
 {-------------------------------------------------------------------------------
-Writes a string to the TFileStream, and terminates it with 0x0A
+Class destructor
 -------------------------------------------------------------------------------}
-function WriteLine(var Stream: TFileStream;Line: string): boolean;
-var
- l,x: Integer;
- S: UTF8String;
+destructor TGJHRegistry.Destroy;
 begin
- S:=UTF8String(Line+#10);
- l:=Length(S);
- x:=Stream.Write(S[1],l);
- Result:=x=l;
+ inherited;
 end;
 
 {-------------------------------------------------------------------------------
 Open the registry key
 -------------------------------------------------------------------------------}
-procedure OpenReg(key: String);
+procedure TGJHRegistry.OpenReg(key: String);
 begin
- CCReg:=TRegistry.Create;
+ FRegistry:=TRegistry.Create;
  if key<>'' then key:='\'+key;
- CCReg.OpenKey(RegKey+key,true);
+ FRegistry.OpenKey(FRegKey+key,true);
 end;
 
 {-------------------------------------------------------------------------------
 Function to delete a key from the registry
 -------------------------------------------------------------------------------}
-function DeleteKey(key: String): Boolean;
+function TGJHRegistry.DeleteKey(key: String): Boolean;
 var
  x: Boolean;
 begin
  x:=True;
  OpenReg(ExtractKey(key));
- if CCReg.ValueExists(key) then x:=CCReg.DeleteValue(key);
- CCReg.Free;
+ if FRegistry.ValueExists(key) then x:=FRegistry.DeleteValue(key);
+ FRegistry.Free;
  Result:=x;
 end;
 
 {-------------------------------------------------------------------------------
 Function to read a string from the registry, or create it if it doesn't exist
 -------------------------------------------------------------------------------}
-function GetRegValS(V: String;D: String): String;
+function TGJHRegistry.GetRegValS(V: String;D: String): String;
 var
  X: String;
 begin
  OpenReg(ExtractKey(V));
- If CCReg.ValueExists(V)then X:=CCReg.ReadString(V)
- else begin X:=D;CCReg.WriteString(V,X);end;
- CCReg.Free;
+ If FRegistry.ValueExists(V)then X:=FRegistry.ReadString(V)
+ else begin X:=D;FRegistry.WriteString(V,X);end;
+ FRegistry.Free;
  Result:=X;
 end;
 
 {-------------------------------------------------------------------------------
 Function to read an array from the registry, or create it if it doesn't exist
 -------------------------------------------------------------------------------}
-procedure GetRegValA(V: String;var D: array of Byte);
+procedure TGJHRegistry.GetRegValA(V: String;var D: array of Byte);
 var
  s: Integer;
 begin
  OpenReg(ExtractKey(V));
- If CCReg.ValueExists(V)then
+ If FRegistry.ValueExists(V)then
  begin
-  s:=CCReg.GetDataSize(V);
-  CCReg.ReadBinaryData(V,D,s);
+  s:=FRegistry.GetDataSize(V);
+  FRegistry.ReadBinaryData(V,D,s);
  end
  else
  begin
-  CCReg.WriteBinaryData(V,D,SizeOf(D));
+  FRegistry.WriteBinaryData(V,D,SizeOf(D));
  end;
- CCReg.Free;
+ FRegistry.Free;
 end;
 
 {-------------------------------------------------------------------------------
 Function to read an integer from the registry, or create it if it doesn't exist
 -------------------------------------------------------------------------------}
-function GetRegValI(V: String;D: Cardinal): Cardinal;
+function TGJHRegistry.GetRegValI(V: String;D: Cardinal): Cardinal;
 var
  X: Cardinal;
 begin
  OpenReg(ExtractKey(V));
- If CCReg.ValueExists(V)then X:=CCReg.ReadInteger(V)
- else begin X:=D;CCReg.WriteInteger(V,X);end;
- CCReg.Free;
+ If FRegistry.ValueExists(V)then X:=FRegistry.ReadInteger(V)
+ else begin X:=D;FRegistry.WriteInteger(V,X);end;
+ FRegistry.Free;
  Result:=X;
 end;
 
 {-------------------------------------------------------------------------------
 Function to read a boolean from the registry, or create it if it doesn't exist
 -------------------------------------------------------------------------------}
-function GetRegValB(V: String;D: Boolean): Boolean;
+function TGJHRegistry.GetRegValB(V: String;D: Boolean): Boolean;
 var
  X: Boolean;
 begin
  OpenReg(ExtractKey(V));
- If CCReg.ValueExists(V)then X:=CCReg.ReadBool(V)
- else begin X:=D;CCReg.WriteBool(V,X);end;
- CCReg.Free;
+ If FRegistry.ValueExists(V)then X:=FRegistry.ReadBool(V)
+ else begin X:=D;FRegistry.WriteBool(V,X);end;
+ FRegistry.Free;
  Result:=X;
 end;
 
-function DoesKeyExist(V: String):Boolean;
+{-------------------------------------------------------------------------------
+Does the specified key exist?
+-------------------------------------------------------------------------------}
+function TGJHRegistry.DoesKeyExist(V: String):Boolean;
 begin
  OpenReg(ExtractKey(V));
- Result:=CCReg.ValueExists(V);
- CCReg.Free;
+ Result:=FRegistry.ValueExists(V);
+ FRegistry.Free;
 end;
 
 {-------------------------------------------------------------------------------
 Function to save a string to the registry
 -------------------------------------------------------------------------------}
-procedure SetRegValS(V: String;D: String);
+procedure TGJHRegistry.SetRegValS(V: String;D: String);
 begin
  OpenReg(ExtractKey(V));
- CCReg.WriteString(V,D);
- CCReg.Free;
+ FRegistry.WriteString(V,D);
+ FRegistry.Free;
 end;
 
 {-------------------------------------------------------------------------------
 Function to save an array to the registry
 -------------------------------------------------------------------------------}
-procedure SetRegValA(V: String;var D: array of Byte);
+procedure TGJHRegistry.SetRegValA(V: String;var D: array of Byte);
 begin
  OpenReg(ExtractKey(V));
- CCReg.WriteBinaryData(V,D,SizeOf(D));
- CCReg.Free;
+ FRegistry.WriteBinaryData(V,D,SizeOf(D));
+ FRegistry.Free;
 end;
 
 {-------------------------------------------------------------------------------
 Function to save an integer to the registry
 -------------------------------------------------------------------------------}
-procedure SetRegValI(V: String;D: Cardinal);
+procedure TGJHRegistry.SetRegValI(V: String;D: Cardinal);
 begin
  OpenReg(ExtractKey(V));
- CCReg.WriteInteger(V,D);
- CCReg.Free;
+ FRegistry.WriteInteger(V,D);
+ FRegistry.Free;
 end;
 
 {-------------------------------------------------------------------------------
 Function to save a boolean to the registry
 -------------------------------------------------------------------------------}
-procedure SetRegValB(V: String;D: Boolean);
+procedure TGJHRegistry.SetRegValB(V: String;D: Boolean);
 begin
  OpenReg(ExtractKey(V));
- CCReg.WriteBool(V,D);
- CCReg.Free;
+ FRegistry.WriteBool(V,D);
+ FRegistry.Free;
 end;
 
 {-------------------------------------------------------------------------------
 Function to extract key part of string
 -------------------------------------------------------------------------------}
-function ExtractKey(var V: String):String;
+function TGJHRegistry.ExtractKey(var V: String):String;
 begin
  Result:='';
  if Pos('\',V)>0 then
@@ -240,3 +221,4 @@ begin
 end;
 
 end.
+
