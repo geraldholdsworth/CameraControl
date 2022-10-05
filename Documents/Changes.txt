@@ -15,3 +15,5 @@
 ---------------------------------
 * The connected camera would be forgotten about when the main window is closed and re-opened again. This has now been fixed.
 * Utilised a different module for serial communications. Application now works on macOS.
+* Cameras are now searched for when the main window is opened.
+* Only buttons where a camera has been found get displayed on the main window.
